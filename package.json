@@ -1,0 +1,13 @@
+{
+  "name": "sqlbuilder",
+  "version": "1.0.0",
+  "description": "This is a SQL query builder inspired by Laravel's Eloquent with a lightly different syntax. My intention is to make cleaner code inside a JS backend controller",
+  "main": "index.js",
+  "repository": "https://github.com/LearnLab/sqlbuilder.git",
+  "author": "Diego Castillo <0325.diego@gmail.com>",
+  "license": "GPL-3.0-only",
+  "private": false,
+  "devDependencies": {
+    "jest": "^26.6.3"
+  }
+}
