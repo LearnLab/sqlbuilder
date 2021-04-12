@@ -7,8 +7,12 @@
  * directly. Hopefully this will make controller code a lot more
  * readable.
  */
-export default class SQLBuilder {
+class SQLBuilder {
+    // Only initialize attributes used for every method
     constructor() {
         this.statement = null;
     }
+
 }
+
+module.exports = SQLBuilder;
