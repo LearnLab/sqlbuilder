@@ -13,6 +13,38 @@ class SQLBuilder {
         this.statement = null;
     }
 
+    /**
+     * <select statement> ::=
+     *      <table expression>
+     *
+     * <table expression> ::=
+     *      <select block head> [ <select block tail> ]
+     *
+     * <select block head> ::=
+     *      <select clause>
+     *      [ <from clause>
+     *      [ <where clause> ]
+     *      [ <group by clause> ]
+     *      [ <having clause> ] ]
+     *
+     * <select block tail> ::=
+     *      <order by clause> |
+     *      <limit clause> |
+     *      <order by clause> <limit clause>
+     */
+
+    /**
+     * <select clause> ::=
+     *      SELECT <select option>... <select element list>
+     */
+    static select(...columns) {
+        let query = new SQLBuilder();
+
+        // Initialize everything needed for select statements
+        query.statement = 'select';
+
+        return query;
+    }
 }
 
 module.exports = SQLBuilder;
