@@ -42,8 +42,20 @@ class SQLBuilder {
 
         // Initialize everything needed for select statements
         query.statement = 'select';
+        query.columns = ["*"];
+        query.values = [];
+
+        if(columns.length !== 0)
+            query.columns = columns;
 
         return query;
+    }
+
+    /**
+     * Select statement string
+     */
+    selectStatement() {
+        return 'SELECT;';
     }
 }
 
