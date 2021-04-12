@@ -55,7 +55,24 @@ class SQLBuilder {
      * Select statement string
      */
     selectStatement() {
-        return 'SELECT;';
+        let query = 'SELECT';
+
+        // Add select clause
+        const elementsList = this.columns.reduce((colList, col, index) => {
+            if(col instanceof Array) {
+                const [name, alias] = col;
+
+                return (index > 0) ? `${colList}, ${name} AS ${alias}` : `${name} AS ${alias}`;
+            }
+
+            return (index > 0) ? `${colList}, ${col}` : `${col}`;
+        });
+        query += ` ${elementsList}`;
+
+        // Finish
+        query += ';';
+
+        return query;
     }
 }
 

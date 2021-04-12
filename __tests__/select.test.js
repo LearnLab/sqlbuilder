@@ -15,3 +15,17 @@ test('Select statement should always contain a columns and a values list', () =>
     expect(query.values).not.toBe(undefined);
     expect(query.values.length).toBeGreaterThanOrEqual(0);
 });
+
+test('SQLBuilder.select(col1, col2, col3) => SELECT col1, col2, col3;', () => {
+    const columns = ["col1", "col2", "col3"];
+    const query = SQLBuilder.select(...columns);
+
+    expect(query.selectStatement()).toEqual('SELECT col1, col2, col3;');
+});
+
+test('SQLBuilder.select(col1, col2, [col3, alias]) => SELECT col1, col2, col3 AS alias;', () => {
+    const columns = ["col1", "col2", ["col3", "alias"]];
+    const query = SQLBuilder.select(...columns);
+
+    expect(query.selectStatement()).toEqual('SELECT col1, col2, col3 AS alias;');
+});
