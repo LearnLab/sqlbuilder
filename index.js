@@ -94,6 +94,9 @@ class SQLBuilder {
         /* For group by clause */
         query.groups = [];
 
+        /* For havings clause */
+        query.havings = [];
+
         if(columns.length !== 0)
             query.columns = columns;
 
@@ -245,6 +248,30 @@ class SQLBuilder {
             return '';
 
         return `GROUP BY ${SQLBuilder.getSorts(this.groups)}`;
+    }
+
+    /**
+     * <having clause> ::=
+     *      HAVING <condition>
+     */
+    having(aggr, conditional, value) {
+        this.havings = [aggr, conditional, value];
+
+        return this;
+    }
+
+    /**
+     * Having clause
+     */
+    havingClause() {
+        if(this.havings.length === 0)
+            return '';
+
+        const [aggr, conditional, value] = this.havings;
+
+        this.values.push(value);
+
+        return `HAVING ${aggr}${conditional}$${this.values.length}`;
     }
 }
 
