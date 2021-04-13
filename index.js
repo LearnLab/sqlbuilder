@@ -288,12 +288,9 @@ class SQLBuilder {
      *
      * <sort direction> ::= ASC | DESC
      */
-    orderBy(col, dir) {
-        if(dir) {
-            this.orders.push([col, dir.toUpperCase()]);
-        } else {
-            this.orders.push(col);
-        }
+    orderBy(...orders) {
+        if(orders.length > 0)
+            this.orders = orders;
 
         return this;
     }
