@@ -18,15 +18,18 @@ class SQLBuilder {
      * of elements
      */
     static getList(elements) {
-        const elementsList = elements.reduce((colList, col, index) => {
+        let elementsList = '';
+
+        for(let i = 0; i < elements.length; i++) {
+            let col = elements[i];
+
             if(col instanceof Array) {
                 const [name, alias] = col;
-
-                return (index > 0) ? `${colList}, ${name} AS ${alias}` : `${name} AS ${alias}`;
+                col = `${name} AS ${alias}`;
             }
 
-            return (index > 0) ? `${colList}, ${col}` : `${col}`;
-        });
+            elementsList += (i > 0) ? `, ${col}` : col;
+        }
 
         return elementsList;
     }
@@ -58,10 +61,14 @@ class SQLBuilder {
     static select(...columns) {
         let query = new SQLBuilder();
 
-        // Initialize everything needed for select statements
+        /* Initialize everything needed for select statements */
         query.statement = 'select';
         query.columns = ["*"];
         query.values = [];
+
+        /* For where clause */
+        query.predicates = [];
+        query.conditionals = [];
 
         if(columns.length !== 0)
             query.columns = columns;
@@ -70,17 +77,29 @@ class SQLBuilder {
     }
 
     /**
+     * Select clause
+     */
+    selectClause() {
+        return `SELECT ${SQLBuilder.getList(this.columns)}`;
+    }
+
+    /**
      * Select statement string
      */
     selectStatement() {
-        let query = '';
+        /* Reset prepared values */
+        this.values = [];
 
         /* Add select clause */
-        query += `SELECT ${SQLBuilder.getList(this.columns)}`;
+        let query = this.selectClause();
 
         /* Add from clause */
-        if(this.tables)
-            query += ` FROM ${SQLBuilder.getList(this.tables)}`;
+        query += ` ${this.fromClause()}`;
+
+        /* Add where clause */
+        const where = this.whereClause();
+        if(where)
+            query += ` ${where}`;
 
         /* Finish */
         query += ';';
@@ -106,6 +125,72 @@ class SQLBuilder {
         this.tables = tables;
 
         return this;
+    }
+
+    /**
+     * From clause
+     */
+    fromClause() {
+        return `FROM ${SQLBuilder.getList(this.tables)}`;
+    }
+
+    /**
+     * <where clause> ::=
+     *      WHERE <condition>
+     *
+     * <condition> ::=
+     *      <predicate>                 |
+     *      <predicate> OR <predicate>  |
+     *      <predicate> AND <predicate> |
+     *      ( <condition> )             |
+     *      NOT <condition>
+     *
+     * <predicate> ::=
+     *      <predicate with comparison>     |
+     *      <predicate without comparison>  |
+     *      <predicate with in>             |
+     *      <predicate with between>        |
+     *      <predicate with like>           |
+     *      <predicate with regexp>         |
+     *      <predicate with match>          |
+     *      <predicate with null>           |
+     *      <predicate with exists>         |
+     *      <predicate with any all>
+     */
+    where(column, operator, value) {
+        if(this.predicates.length > 0)
+            this.conditionals.push('AND');
+
+        this.predicates.push([column, operator, value]);
+
+        return this;
+    }
+
+    /* Get where clause */
+    whereClause() {
+        if(this.predicates.length === 0)
+            return '';
+
+        const max = this.predicates.length;
+        let predicates = '';
+
+        for(let i = 0; i < max; i++) {
+            const [column, operator, value] = this.predicates[i];
+
+            this.values.push(value);
+
+            let predicate = `${column}${operator}$${this.values.length}`;
+
+            if(3 <= max && (i + 1) < max && i % 2 === 0)
+                predicate = `(${predicate}`;
+
+            if(3 <= max && (i + 1) <= max && i % 2 !== 0)
+                predicate = `${predicate})`;
+
+            predicates = (i > 0) ? `${predicates} ${this.conditionals[i - 1]} ${predicate}` : `${predicate}`;
+        }
+
+        return `WHERE ${predicates}`;
     }
 }
 
