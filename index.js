@@ -14,8 +14,8 @@ class SQLBuilder {
     }
 
     /**
-     * Gets a string of 'element1, element2, element3 AS alias' from an array
-     * of elements
+     * Based on a given array of elements [[elem1, alias1], [elem2, alias2]..., [elemN, aliasN]]
+     * get the resulting 'elem1 AS alas1, elem2 AS alias2, ... , elemN AS aliasN'
      */
     static getList(elements) {
         let elementsList = '';
@@ -32,6 +32,27 @@ class SQLBuilder {
         }
 
         return elementsList;
+    }
+
+    /**
+     * Based on a given array of elements [[elem1, dir1], [elem2, dir2]..., [elemN, dirN]]
+     * get the resulting 'elem1 AS DIR1, elem2 AS DIR2, ... , elemN AS DIRN'
+     */
+    static getSorts(elements) {
+        let sorts = '';
+
+        for(let i = 0; i < elements.length; i++) {
+            let col = elements[i];
+
+            if(col instanceof Array) {
+                const [name, dir] = col;
+                col = `${name} ${dir.toUpperCase()}`;
+            }
+
+            sorts += (i > 0) ? `, ${col}` : col;
+        }
+
+        return sorts;
     }
 
     /**
@@ -69,6 +90,9 @@ class SQLBuilder {
         /* For where clause */
         query.predicates = [];
         query.conditionals = [];
+
+        /* For group by clause */
+        query.groups = [];
 
         if(columns.length !== 0)
             query.columns = columns;
@@ -191,6 +215,36 @@ class SQLBuilder {
         }
 
         return `WHERE ${predicates}`;
+    }
+
+    /**
+     * <group by clause> ::=
+     *      GROUP BY <group by specification list> [ WITH ROLLUP ]
+     *
+     * <group by specification list> ::=
+     *      <group by specification> [ , <group by specification> ]...
+     *
+     * <group by specification> ::=
+     *      <group by expression> [ <sort direction> ]
+     *
+     * <group by expression> ::= <scalar expression>
+     *
+     * <sort direction> ::= ASC | DESC
+     */
+    groupBy(...groups) {
+        this.groups = groups;
+
+        return this;
+    }
+
+    /**
+     * Group by clause
+     */
+    groupByClause() {
+        if(this.groups.length === 0)
+            return '';
+
+        return `GROUP BY ${SQLBuilder.getSorts(this.groups)}`;
     }
 }
 
