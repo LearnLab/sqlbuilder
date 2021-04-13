@@ -36,7 +36,7 @@ class SQLBuilder {
 
     /**
      * Based on a given array of elements [[elem1, dir1], [elem2, dir2]..., [elemN, dirN]]
-     * get the resulting 'elem1 AS DIR1, elem2 AS DIR2, ... , elemN AS DIRN'
+     * get the resulting 'elem1 DIR1, elem2 DIR2, ... , elemN DIRN'
      */
     static getSorts(elements) {
         let sorts = '';
@@ -96,6 +96,9 @@ class SQLBuilder {
 
         /* For havings clause */
         query.havings = [];
+
+        /* For order by clause */
+        query.orders = [];
 
         if(columns.length !== 0)
             query.columns = columns;
@@ -272,6 +275,37 @@ class SQLBuilder {
         this.values.push(value);
 
         return `HAVING ${aggr}${conditional}$${this.values.length}`;
+    }
+
+    /**
+     * <order by clause> ::=
+     *      ORDER BY <sort specification> [ , <sort specification> ]...
+     *
+     * <sort specification> ::=
+     *      <column name> [ <sort direction> ]          |
+     *      <scalar expression> [ <sort direction> ]    |
+     *      <sequence number> [ <sort direction> ]
+     *
+     * <sort direction> ::= ASC | DESC
+     */
+    orderBy(col, dir) {
+        if(dir) {
+            this.orders.push([col, dir.toUpperCase()]);
+        } else {
+            this.orders.push(col);
+        }
+
+        return this;
+    }
+
+    /**
+     * Order by clause
+     */
+    orderByClause() {
+        if(this.orders.length === 0)
+            return '';
+
+        return `ORDER BY ${SQLBuilder.getSorts(this.orders)}`;
     }
 }
 
