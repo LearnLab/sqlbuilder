@@ -8,9 +8,27 @@
  * readable.
  */
 class SQLBuilder {
-    // Only initialize attributes used for every method
+    /* Only initialize attributes used for every method */
     constructor() {
         this.statement = null;
+    }
+
+    /**
+     * Gets a string of 'element1, element2, element3 AS alias' from an array
+     * of elements
+     */
+    static getList(elements) {
+        const elementsList = elements.reduce((colList, col, index) => {
+            if(col instanceof Array) {
+                const [name, alias] = col;
+
+                return (index > 0) ? `${colList}, ${name} AS ${alias}` : `${name} AS ${alias}`;
+            }
+
+            return (index > 0) ? `${colList}, ${col}` : `${col}`;
+        });
+
+        return elementsList;
     }
 
     /**
@@ -55,24 +73,39 @@ class SQLBuilder {
      * Select statement string
      */
     selectStatement() {
-        let query = 'SELECT';
+        let query = '';
 
-        // Add select clause
-        const elementsList = this.columns.reduce((colList, col, index) => {
-            if(col instanceof Array) {
-                const [name, alias] = col;
+        /* Add select clause */
+        query += `SELECT ${SQLBuilder.getList(this.columns)}`;
 
-                return (index > 0) ? `${colList}, ${name} AS ${alias}` : `${name} AS ${alias}`;
-            }
+        /* Add from clause */
+        if(this.tables)
+            query += ` FROM ${SQLBuilder.getList(this.tables)}`;
 
-            return (index > 0) ? `${colList}, ${col}` : `${col}`;
-        });
-        query += ` ${elementsList}`;
-
-        // Finish
+        /* Finish */
         query += ';';
 
         return query;
+    }
+
+
+    /**
+     * <from clause> ::=
+     *      FROM <table reference> [ , <table reference> ]...
+     *
+     * <table reference> ::=
+     *      <table specification> [ [ AS ] <pseudonym> ]
+     *
+     * <table specification> ::=
+     *      [ <database name> . ] <table name>
+     *
+     * <pseudonym> ::=
+     *      <name>
+     */
+    from(...tables) {
+        this.tables = tables;
+
+        return this;
     }
 }
 

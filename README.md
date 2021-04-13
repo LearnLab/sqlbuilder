@@ -51,15 +51,4 @@ const query = SQLBuilder.select(<select element list>)
 
 #### Select element list
 
-You can simply specify a given amount of elements to select and you can specify aliases by adding an array of 2 elements instead of a single string
-
-``` javascript
-const query = SQLBuilder.select("col1", "col2", ["col3", "alias"]);
-```
-
-which produces
-
-``` sh
-'SELECT col1, col2, col3 AS alias;'
-```
-
+You can simply specify a given amount of elements to select and you can specify aliases by adding an array of 2 elements instead of a single string, for example `SQLBuilder.select("col1", "col2", ["col3", "alias"]);` which produces `'SELECT col1, col2, col3 AS alias;'`.
