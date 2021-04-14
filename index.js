@@ -104,6 +104,12 @@ class SQLBuilder {
 
                     if(b === '*')
                         throw new Error('You can not use * as an alias for a select element');
+
+                    if(!a)
+                        throw new Error('You can not use an empty string as a select element');
+
+                    if(!b)
+                        throw new Error('You can not use an empty string as an alias');
                 }
 
                 if(col.length === 1) {
@@ -114,11 +120,17 @@ class SQLBuilder {
 
                     if(a === '*' && arr.length > 1)
                         throw new Error('You can not use * as one of multiple elements');
+
+                    if(!a)
+                        throw new Error('You can not use an empty string as a select element');
                 }
 
                 if(col.length === 0)
                     throw new Error('You can not use empty or nested arrays as select elements');
             }
+
+            if(!col)
+                throw new Error('You can not use an empty string as a select element');
         });
 
         let query = new SQLBuilder();
@@ -180,7 +192,7 @@ class SQLBuilder {
         if(this.tables)
             throw new Error('You can not call from() function more than once, for more table specifications use from(table1, table2...)');
 
-        tables.forEach((table, _, arr) => {
+        tables.forEach((table) => {
             if(table === '*')
                 throw new Error('Invalid table specification');
 

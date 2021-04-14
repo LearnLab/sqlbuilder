@@ -69,6 +69,24 @@ test('query.select([col1, alias1, alias2, alias3, alias4], col2) => throw Error'
     expect(() => SQLBuilder.select(...columns).selectClause()).toThrow(Error('You can not add more than 1 alias to a select element'));
 });
 
+test('query.select(one, ) => throw Error', () => {
+    const columns = ['one', ''];
+
+    expect(() => SQLBuilder.select(...columns).selectClause()).toThrow(Error('You can not use an empty string as a select element'));
+});
+
+test('query.select([, alias]) => throw Error', () => {
+    const columns = ['', 'alias'];
+
+    expect(() => SQLBuilder.select(...columns).selectClause()).toThrow(Error('You can not use an empty string as a select element'));
+});
+
+test('query.select([col, ]) => throw Error', () => {
+    const columns = [['col', '']];
+
+    expect(() => SQLBuilder.select(...columns).selectClause()).toThrow(Error('You can not use an empty string as an alias'));
+});
+
 test('query.select([[]], [[[]]]) => throw Error', () => {
     const columns = [[[]], [[[]]]];
 
