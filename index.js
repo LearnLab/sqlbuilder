@@ -177,6 +177,54 @@ class SQLBuilder {
      *      <name>
      */
     from(...tables) {
+        if(this.tables)
+            throw new Error('You can not call from() function more than once, for more table specifications use from(table1, table2...)');
+
+        tables.forEach((table, _, arr) => {
+            if(table === '*')
+                throw new Error('Invalid table specification');
+
+            if(table instanceof Array) {
+                if(table.length > 2)
+                    throw new Error('You can not specify more than one alias to a table');
+
+                if(table.length === 2) {
+                    const [a, b] = table;
+
+                    if(a instanceof Array || b instanceof Array)
+                        throw new Error('You can not use empty or nested arrays as select elements');
+
+                    if(!a || !b)
+                        throw new Error('You can not use an empty string as a table reference');
+
+                    if(a === '*')
+                        throw new Error('Invalid table specification');
+
+                    if(b === '*')
+                        throw new Error('You can not use * as an alias for a table');
+                }
+
+                if(table.length === 1) {
+                    const [a] = table;
+
+                    if(!a)
+                        throw new Error('You can not use an empty string as a table reference');
+
+                    if(a instanceof Array)
+                        throw new Error('You can not use empty or nested array list as a table references');
+
+                    if(a === '*')
+                        throw new Error('You can not use * as an alias for a table');
+                }
+
+                if(table.length === 0)
+                    throw new Error('You can not use an empty or nested array list as a table reference');
+            }
+        });
+
+        if(tables.length === 0)
+            throw new Error('You can not use an empty string as a table reference');
+
         this.tables = tables;
 
         return this;
