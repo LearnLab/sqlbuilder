@@ -24,8 +24,12 @@ class SQLBuilder {
             let col = elements[i];
 
             if(col instanceof Array) {
-                const [name, alias] = col;
-                col = `${name} AS ${alias}`;
+                if(col.length === 2) {
+                    const [name, alias] = col;
+                    col = `${name} AS ${alias}`;
+                } else {
+                    col = col[0];
+                }
             }
 
             elementsList += (i > 0) ? `, ${col}` : col;
@@ -82,26 +86,26 @@ class SQLBuilder {
     static select(...columns) {
         let query = new SQLBuilder();
 
+        columns.forEach((col, _, arr) => {
+            if(col === '*' && arr.length > 1)
+                throw new Error('You can not use * as one of multiple elements');
+
+            if(col instanceof Array) {
+                if(col.length > 2)
+                    throw new Error('You can not add more than 1 alias to a select element');
+
+                if(col.length === 2 && (col[0] instanceof Array || col[1] instanceof Array))
+                        throw new Error('You can not use empty arrays as select elements');
+
+                if(col.length === 0 || (col.length === 1 && col[0] instanceof Array))
+                    throw new Error('You can not use empty or nested arrays as select elements');
+            }
+        });
+
         /* Initialize everything needed for select statements */
         query.statement = 'select';
-        query.columns = ["*"];
+        query.columns = (columns.length !== 0) ? columns : ['*'];
         query.values = [];
-
-        /* For where clause */
-        query.predicates = [];
-        query.conditionals = [];
-
-        /* For group by clause */
-        query.groups = [];
-
-        /* For havings clause */
-        query.havings = [];
-
-        /* For order by clause */
-        query.orders = [];
-
-        if(columns.length !== 0)
-            query.columns = columns;
 
         return query;
     }
@@ -161,6 +165,9 @@ class SQLBuilder {
      * From clause
      */
     fromClause() {
+        if(!this.tables || this.tables.length === 0)
+            return null;
+
         return `FROM ${SQLBuilder.getList(this.tables)}`;
     }
 
@@ -188,6 +195,13 @@ class SQLBuilder {
      *      <predicate with any all>
      */
     where(column, operator, value) {
+        /* Star off by checking */
+        if(!this.predicates)
+            this.predicates = [];
+
+        if(!this.conditionals)
+            this.conditionals = [];
+
         if(this.predicates.length > 0)
             this.conditionals.push('AND');
 
@@ -198,8 +212,8 @@ class SQLBuilder {
 
     /* Get where clause */
     whereClause() {
-        if(this.predicates.length === 0)
-            return '';
+        if(!this.predicates || this.predicates.length === 0 || !this.conditionals)
+            return null;
 
         const max = this.predicates.length;
         let predicates = '';
@@ -247,8 +261,8 @@ class SQLBuilder {
      * Group by clause
      */
     groupByClause() {
-        if(this.groups.length === 0)
-            return '';
+        if(!this.groups || this.groups.length === 0)
+            return null;
 
         return `GROUP BY ${SQLBuilder.getSorts(this.groups)}`;
     }
@@ -267,8 +281,8 @@ class SQLBuilder {
      * Having clause
      */
     havingClause() {
-        if(this.havings.length === 0)
-            return '';
+        if(!this.havings || this.havings.length === 0)
+            return null;
 
         const [aggr, conditional, value] = this.havings;
 
@@ -289,8 +303,7 @@ class SQLBuilder {
      * <sort direction> ::= ASC | DESC
      */
     orderBy(...orders) {
-        if(orders.length > 0)
-            this.orders = orders;
+        this.orders = orders;
 
         return this;
     }
@@ -299,8 +312,8 @@ class SQLBuilder {
      * Order by clause
      */
     orderByClause() {
-        if(this.orders.length === 0)
-            return '';
+        if(!this.orders || this.orders.length === 0)
+            return null;
 
         return `ORDER BY ${SQLBuilder.getSorts(this.orders)}`;
     }
@@ -324,7 +337,7 @@ class SQLBuilder {
      */
     limitClause() {
         if(!this.fetch)
-            return '';
+            return null;
 
         if(this.fetch instanceof Array) {
             const [fetch, offset] = this.fetch;
