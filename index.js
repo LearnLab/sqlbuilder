@@ -84,8 +84,7 @@ class SQLBuilder {
      *      SELECT <select option>... <select element list>
      */
     static select(...columns) {
-        let query = new SQLBuilder();
-
+        /* First validate */
         columns.forEach((col, _, arr) => {
             if(col === '*' && arr.length > 1)
                 throw new Error('You can not use * as one of multiple elements');
@@ -94,13 +93,35 @@ class SQLBuilder {
                 if(col.length > 2)
                     throw new Error('You can not add more than 1 alias to a select element');
 
-                if(col.length === 2 && (col[0] instanceof Array || col[1] instanceof Array))
-                        throw new Error('You can not use empty arrays as select elements');
+                if(col.length === 2) {
+                    const [a, b] = col;
 
-                if(col.length === 0 || (col.length === 1 && col[0] instanceof Array))
+                    if(a instanceof Array || b instanceof Array)
+                        throw new Error('You can not use empty or nested arrays as select elements');
+
+                    if(a === '*' && arr.length > 1)
+                        throw new Error('You can not use * as one of multiple elements');
+
+                    if(b === '*')
+                        throw new Error('You can not use * as an alias for a select element');
+                }
+
+                if(col.length === 1) {
+                    const [a] = col;
+
+                    if(a instanceof Array)
+                        throw new Error('You can not use empty or nested arrays as select elements');
+
+                    if(a === '*' && arr.length > 1)
+                        throw new Error('You can not use * as one of multiple elements');
+                }
+
+                if(col.length === 0)
                     throw new Error('You can not use empty or nested arrays as select elements');
             }
         });
+
+        let query = new SQLBuilder();
 
         /* Initialize everything needed for select statements */
         query.statement = 'select';

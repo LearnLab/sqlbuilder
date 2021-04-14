@@ -45,8 +45,20 @@ test('query.select().select() => throw Error', () => {
     expect(() => SQLBuilder.select(...columns).select(...columns).selectClause()).toThrow(Error);
 });
 
+test('query.select(one, [two, *], [three, *]) => throw Error', () => {
+    const columns = ['one', ['two', '*'], ['three', '*']];
+
+    expect(() => SQLBuilder.select(...columns).selectClause()).toThrow(Error('You can not use * as an alias for a select element'));
+});
+
 test('query.select(one, two, *, four, *) => throw Error', () => {
     const columns = ['one', 'two', '*', 'four', '*'];
+
+    expect(() => SQLBuilder.select(...columns).selectClause()).toThrow(Error('You can not use * as one of multiple elements'));
+});
+
+test('query.select([one], [two], [*], [four], [*]) => throw Error', () => {
+    const columns = [['one'], ['two'], ['*'], ['four'], ['*']];
 
     expect(() => SQLBuilder.select(...columns).selectClause()).toThrow(Error('You can not use * as one of multiple elements'));
 });
@@ -66,5 +78,5 @@ test('query.select([[]], [[[]]]) => throw Error', () => {
 test('query.select([], [], [], []) => throw Error', () => {
     const columns = [[], [], [], []];
 
-    expect(() => SQLBuilder.select(...columns).selectClause()).toThrow('You can not use empty or nested arrays as select elements');
+    expect(() => SQLBuilder.select(...columns).selectClause()).toThrow(Error('You can not use empty or nested arrays as select elements'));
 });
