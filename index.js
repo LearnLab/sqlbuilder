@@ -304,6 +304,35 @@ class SQLBuilder {
 
         return `ORDER BY ${SQLBuilder.getSorts(this.orders)}`;
     }
+
+    /**
+     * <limit clause> ::=
+     *      LIMIT [ <fetch offset> , ] <fetch number of rows        |
+     *      LIMIT <fetch number of rows> [ OFFSET <fetch offset> ]
+     *
+     * <fetch number of rows>   ;
+     * <fetch offset>           ::= <whole number>
+     */
+    limit(fetch) {
+        this.fetch = fetch;
+
+        return this;
+    }
+
+    /**
+     * Limit clause
+     */
+    limitClause() {
+        if(!this.fetch)
+            return '';
+
+        if(this.fetch instanceof Array) {
+            const [fetch, offset] = this.fetch;
+            return `LIMIT ${fetch} OFFSET ${offset}`;
+        }
+
+        return `LIMIT ${this.fetch}`;
+    }
 }
 
 module.exports = SQLBuilder;
