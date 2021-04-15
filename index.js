@@ -206,8 +206,11 @@ class SQLBuilder {
                     if(a instanceof Array || b instanceof Array)
                         throw new Error('You can not use empty or nested arrays as select elements');
 
-                    if(!a || !b)
+                    if(!a)
                         throw new Error('You can not use an empty string as a table reference');
+
+                    if(!b)
+                        throw new Error('You can not use an empty string as a table alias');
 
                     if(a === '*')
                         throw new Error('Invalid table specification');
@@ -232,6 +235,9 @@ class SQLBuilder {
                 if(table.length === 0)
                     throw new Error('You can not use an empty or nested array list as a table reference');
             }
+
+            if(!table)
+                throw new Error('You can not use an empty string as a table reference');
         });
 
         if(tables.length === 0)

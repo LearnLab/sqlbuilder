@@ -76,7 +76,7 @@ test('query.select(one, ) => throw Error', () => {
 });
 
 test('query.select([, alias]) => throw Error', () => {
-    const columns = ['', 'alias'];
+    const columns = [['', 'alias']];
 
     expect(() => SQLBuilder.select(...columns).selectClause()).toThrow(Error('You can not use an empty string as a select element'));
 });

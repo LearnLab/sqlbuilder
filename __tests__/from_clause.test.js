@@ -37,6 +37,27 @@ test('query.from() => throw Error', () => {
     expect(() => query.from().fromClause()).toThrow(Error('You can not use an empty string as a table reference'));
 });
 
+test('query.from([table, ]) => throw Error', () => {
+    const query = SQLBuilder.select('*');
+    const tables = [['table', '']]
+
+    expect(() => query.from(...tables).fromClause()).toThrow(Error('You can not use an empty string as a table alias'));
+});
+
+test('query.from(table, , table3) => throw Error', () => {
+    const query = SQLBuilder.select('*');
+    const tables = ['table', '', 'table3'];
+
+    expect(() => query.from(...tables).fromClause()).toThrow(Error('You can not use an empty string as a table reference'));
+});
+
+test('query.from([, alias]) => throw Error', () => {
+    const query = SQLBuilder.select('*');
+    const tables = [['', 'alias']]
+
+    expect(() => query.from(...tables).fromClause()).toThrow(Error('You can not use an empty string as a table reference'));
+});
+
 test('query.from([], [], [], [[]]) => throw Error', () => {
     const query = SQLBuilder.select('*');
     const tables = [[], [], [], [[]]];
@@ -61,8 +82,6 @@ test('query.from(*) => throw Error', () => {
 test('query.from([table, *]) => throw Error', () => {
     const query = SQLBuilder.select('*');
     const tables = [['table', '*']];
-
-    console.log(...tables);
 
     expect(() => query.from(...tables).fromClause()).toThrow(Error('You can not use * as an alias for a table'));
 });
