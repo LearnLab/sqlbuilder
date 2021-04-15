@@ -1,4 +1,5 @@
 # SQLBuilder
+[![Build Status](https://travis-ci.com/LearnLab/sqlbuilder.svg?branch=main)](https://travis-ci.com/LearnLab/sqlbuilder)
 
 This is an interface to create SQL queries without plain text, to make JS backend controllers cleaner and easier to read. I'm strongly inspired to do so after learning about Laravel's Eloquent and QueryBuilder. Hopefully this will make the development process a more enjoyable one.
 
