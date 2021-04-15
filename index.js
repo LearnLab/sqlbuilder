@@ -161,7 +161,9 @@ class SQLBuilder {
         let query = this.selectClause();
 
         /* Add from clause */
-        query += ` ${this.fromClause()}`;
+        const from = this.fromClause();
+        if(from)
+            query += ` ${from}`;
 
         /* Add where clause */
         const where = this.whereClause();
@@ -291,6 +293,15 @@ class SQLBuilder {
 
         if(this.predicates.length > 0)
             this.conditionals.push('AND');
+
+        this.predicates.push([column, operator, value]);
+
+        return this;
+    }
+
+    orWhere(column, operator, value) {
+        /* Star off by checking */
+        this.conditionals.push('OR');
 
         this.predicates.push([column, operator, value]);
 
