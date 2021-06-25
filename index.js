@@ -1,5 +1,4 @@
 /**
- *
  * SQLBuilder class
  *
  * The goal of this class is to create an interface similar to that of
@@ -126,7 +125,7 @@ class SQLBuilder {
     /* Initialize everything needed for select statements */
     query.statement = 'select';
     query.columns = (columns.length !== 0) ? columns : ['*'];
-    query.values = [];
+    query.columnValues = [];
 
     return query;
   }
@@ -143,7 +142,7 @@ class SQLBuilder {
    */
   selectStatement() {
     /* Reset prepared values */
-    this.values = [];
+    this.columnValues = [];
 
     /* Add select clause */
     let query = this.selectClause();
@@ -285,9 +284,9 @@ class SQLBuilder {
     for (let i = 0; i < max; i += 1) {
       const [column, operator, value] = this.predicates[i];
 
-      this.values.push(value);
+      this.columnValues.push(value);
 
-      let predicate = `${column}${operator}$${this.values.length}`;
+      let predicate = `${column}${operator}$${this.columnValues.length}`;
 
       if (max >= 3 && (i + 1) < max && i % 2 === 0) predicate = `(${predicate}`;
 
@@ -346,9 +345,9 @@ class SQLBuilder {
 
     const [aggr, conditional, value] = this.havings;
 
-    this.values.push(value);
+    this.columnValues.push(value);
 
-    return `HAVING ${aggr}${conditional}$${this.values.length}`;
+    return `HAVING ${aggr}${conditional}$${this.columnValues.length}`;
   }
 
   /**
@@ -403,6 +402,101 @@ class SQLBuilder {
     }
 
     return `LIMIT ${this.fetch}`;
+  }
+
+  /**
+   * Start an insert operation, for which you need to specify
+   * optionaly a list of columns, the table into which to
+   * insert and the values
+   *
+   * @param {Array} columns
+   * @return {SQLBuilder} query
+   */
+  static insert(...columns) {
+    const query = new SQLBuilder();
+
+    /* Declare initials */
+    query.statement = 'insert';
+    query.columns = (columns.length > 0) ? columns : [];
+    query.columnValues = [];
+
+    return query;
+  }
+
+  /**
+   * Indicate the table in which to insert the new data,
+   * this must be a table specification
+   *
+   * @param {string} table
+   * @return {SQLBuilder} this
+   */
+  into(table) {
+    this.table = table;
+
+    return this;
+  }
+
+  /**
+   * Indicate the values to insert. These can be either to
+   * insert one or multiple rows
+   *
+   * @param {Array} columnValues
+   * @return {SQLBuilder} this
+   */
+  values(...columnValues) {
+    this.columnValues = columnValues;
+
+    return this;
+  }
+
+  /**
+   * Returns the scalar row expression with
+   * possibly multiple rows to add
+   *
+   * @return {string} valuesClause
+   */
+  valuesClause() {
+    const preparedValue = (_, i, arr, add = 0) => {
+      let crtValue = `$${i + 1 + add}`;
+
+      if (i === 0) crtValue = `(${crtValue}`;
+      if (i + 1 === arr.length) crtValue = `${crtValue})`;
+
+      return crtValue;
+    };
+
+    const rowExpressions = this.columnValues.map((scalar, i, arr) => {
+      if (scalar instanceof Array) {
+        return scalar.map((_, b, inner) => preparedValue(_, b, inner, i * inner.length))
+          .join(', ');
+      }
+
+      return preparedValue(scalar, i, arr);
+    });
+
+    return `${rowExpressions.join(', ')}`;
+  }
+
+  /**
+   * Returns the insert statement for the current insert
+   * operation
+   *
+   * @return {string} insertStatement
+   */
+  insertStatement() {
+    let statement = 'INSERT';
+
+    statement += ` INTO ${this.table}`;
+
+    if (this.columns.length > 0) statement += ` (${this.columns.join(', ')})`;
+
+    statement += ' VALUES';
+
+    statement += ` ${this.valuesClause()}`;
+
+    statement += ';';
+
+    return statement;
   }
 }
 
