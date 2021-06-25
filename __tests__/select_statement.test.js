@@ -11,5 +11,5 @@ test('query.select().from(users).where(email, =, my_email) => SELECT * FROM user
     .where(...condition);
 
   expect(query.selectStatement()).toEqual('SELECT * FROM users WHERE email=$1;');
-  expect(query.values).toEqual(values);
+  expect(query.columnValues).toEqual(values);
 });

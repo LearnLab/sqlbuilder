@@ -11,7 +11,7 @@ test('query.insert(col1, col2).into(table).values(val1, val2) => INSERT INTO tab
     .values(...values);
 
   expect(query.insertStatement()).toEqual('INSERT INTO table (col1, col2) VALUES ($1, $2);');
-  expect(query.values).toEqual(values);
+  expect(query.columnValues).toEqual(values);
 });
 
 /* Without columns */
@@ -24,7 +24,7 @@ test('query.insert().into(table).values(val1, val2) => INSERT INTO table VALUES 
     .values(...values);
 
   expect(query.insertStatement()).toEqual('INSERT INTO table VALUES ($1, $2);');
-  expect(query.values).toEqual(values);
+  expect(query.columnValues).toEqual(values);
 });
 
 /* Multiple rows */
@@ -37,5 +37,5 @@ test('query.insert().into(table).values([val1, val2], [val3, val4], [val5, val6]
     .values(...values);
 
   expect(query.insertStatement()).toEqual('INSERT INTO table VALUES ($1, $2), ($3, $4), ($5, $6);');
-  expect(query.values).toEqual(values);
+  expect(query.columnValues).toEqual(values);
 });

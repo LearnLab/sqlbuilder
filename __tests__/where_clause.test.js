@@ -12,7 +12,7 @@ test('query.where(col1, =, 123).where(col2, >, 54) => ...WHERE col1=$1 AND col2>
     .where(...condition2);
 
   expect(query.whereClause()).toEqual('WHERE col1=$1 AND col2>$2');
-  expect(query.values).toEqual([condition[2], condition2[2]]);
+  expect(query.columnValues).toEqual([condition[2], condition2[2]]);
 });
 
 test('query.where(col1, =, 123).orWhere(col2, >, 54) => ...WHERE col1=$1 OR col2>$2', () => {
@@ -27,7 +27,7 @@ test('query.where(col1, =, 123).orWhere(col2, >, 54) => ...WHERE col1=$1 OR col2
     .orWhere(...condition2);
 
   expect(query.whereClause()).toEqual('WHERE col1=$1 OR col2>$2');
-  expect(query.values).toEqual([condition[2], condition2[2]]);
+  expect(query.columnValues).toEqual([condition[2], condition2[2]]);
 });
 
 test('query.where(col1, =, 123).orWhere(col2, >, 54).where(col3, <=, 12) => ...WHERE (col1=$1 OR col2>$2) AND col3<=$3', () => {
@@ -45,5 +45,5 @@ test('query.where(col1, =, 123).orWhere(col2, >, 54).where(col3, <=, 12) => ...W
     .where(...condition3);
 
   expect(query.whereClause()).toEqual('WHERE (col1=$1 OR col2>$2) AND col3<=$3');
-  expect(query.values).toEqual(values);
+  expect(query.columnValues).toEqual(values);
 });
