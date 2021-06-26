@@ -474,7 +474,7 @@ class SQLBuilder {
       return preparedValue(scalar, i, arr);
     });
 
-    return `${rowExpressions.join(', ')}`;
+    return rowExpressions.join(', ');
   }
 
   /**
