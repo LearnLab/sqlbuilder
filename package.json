@@ -4,8 +4,9 @@
   "description": "This is a SQL query builder inspired by Laravel's Eloquent with a lightly different syntax. My intention is to make cleaner code inside a JS backend controller",
   "main": "index.js",
   "scripts": {
-    "lint": "eslint index.js __tests__/",
-    "test": "jest --verbose"
+    "test:eslint": "eslint index.js __tests__/",
+    "test:jest": "jest --verbose",
+    "test": "yarn test:eslint && yarn test:jest"
   },
   "repository": "https://github.com/LearnLab/sqlbuilder.git",
   "author": "Diego Castillo <0325.diego@gmail.com>",
