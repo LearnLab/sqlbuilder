@@ -1,3 +1,9 @@
+const {
+  REFERENCE_AND_SCALAR_REQUIRED,
+  AS_MUCH_COLUMNS_AS_VALUES,
+  AT_LEAST_ONE_VALUE,
+} = require('./errors');
+
 /**
  * SQLBuilder class
  *
@@ -418,7 +424,6 @@ class SQLBuilder {
     /* Declare initials */
     query.statement = 'insert';
     query.columns = (columns.length > 0) ? columns : [];
-    query.columnValues = [];
 
     return query;
   }
@@ -444,6 +449,31 @@ class SQLBuilder {
    * @return {SQLBuilder} this
    */
   values(...columnValues) {
+    if (columnValues.length === 0) throw AT_LEAST_ONE_VALUE;
+
+    columnValues.reduce((prev, scalar) => {
+      if (scalar instanceof Array) {
+        if (scalar.length === 0) throw AT_LEAST_ONE_VALUE;
+
+        if (this.columns.length > 0 && this.columns.length !== scalar.length) {
+          throw AS_MUCH_COLUMNS_AS_VALUES;
+        }
+
+        return scalar.length;
+      }
+
+      return scalar;
+    });
+
+    /* Only check outside integrity if the column names are set */
+    if (this.columns.length > 0) {
+      let [sample] = columnValues;
+
+      if (!(sample instanceof Array)) sample = columnValues;
+
+      if (this.columns.length !== sample.length) throw AS_MUCH_COLUMNS_AS_VALUES;
+    }
+
     this.columnValues = columnValues;
 
     return this;
@@ -484,6 +514,8 @@ class SQLBuilder {
    * @return {string} insertStatement
    */
   insertStatement() {
+    if (!this.table || !this.columnValues) throw REFERENCE_AND_SCALAR_REQUIRED;
+
     let statement = 'INSERT';
 
     statement += ` INTO ${this.table}`;
