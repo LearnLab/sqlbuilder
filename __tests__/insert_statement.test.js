@@ -3,6 +3,7 @@ const {
   REFERENCE_AND_SCALAR_REQUIRED,
   AS_MUCH_COLUMNS_AS_VALUES,
   AT_LEAST_ONE_VALUE,
+  NO_SCALARS_AND_ROWS,
   ALL_ROWS_SAME_LENGTH,
   NO_NESTED_VALUES,
 } = require('../errors');
@@ -72,6 +73,12 @@ test('query.insert() prohibits to insert 0 values', () => {
 
   expect(() => emptyValues.values()).toThrow(AT_LEAST_ONE_VALUE);
   expect(() => emptyValuesArray.values(['one'], [], [])).toThrow(AT_LEAST_ONE_VALUE);
+});
+
+test('query.insert() does not allow scalar values and rows mixed', () => {
+  const mixedScalarsRows = SQLBuilder.insert().into('table');
+
+  expect(() => mixedScalarsRows.values('one', ['two', 'three'])).toThrow(NO_SCALARS_AND_ROWS);
 });
 
 test('query.insert() requires the same number of scalar values between all elements to insert', () => {
