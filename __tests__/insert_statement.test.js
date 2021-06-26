@@ -92,5 +92,5 @@ test('query.insert() requires the same number of scalar values between all eleme
 test('query.insert() does not allow nested values (arrays between arrays)', () => {
   const nestedOne = SQLBuilder.insert().into('table');
 
-  expect(() => nestedOne.values(['one'], [['one', 'two'], ['three', 'four']])).toThrow(NO_NESTED_VALUES);
+  expect(() => nestedOne.values(['one'], [['one', 'two']])).toThrow(NO_NESTED_VALUES);
 });
