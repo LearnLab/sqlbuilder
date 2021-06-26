@@ -3,7 +3,7 @@ const {
   REFERENCE_AND_SCALAR_REQUIRED,
   AS_MUCH_COLUMNS_AS_VALUES,
   AT_LEAST_ONE_VALUE,
-  ALL_RECORDS_SAME_LENGTH,
+  ALL_ROWS_SAME_LENGTH,
   NO_NESTED_VALUES,
 } = require('../errors');
 
@@ -59,8 +59,8 @@ test('query.insert() requires a table reference and a set of values', () => {
 });
 
 test('query.insert() requires the same number of column references as scalar values', () => {
-  const moreColumns = SQLBuilder.insert('one', 'two').into('table').values('one');
-  const moreValues = SQLBuilder.insert('one', 'two').into('table').values('one');
+  const moreColumns = SQLBuilder.insert('one', 'two').into('table');
+  const moreValues = SQLBuilder.insert('one', 'two').into('table');
 
   expect(() => moreColumns.values('one')).toThrow(AS_MUCH_COLUMNS_AS_VALUES);
   expect(() => moreValues.values('one', 'two', 'three')).toThrow(AS_MUCH_COLUMNS_AS_VALUES);
@@ -70,16 +70,16 @@ test('query.insert() prohibits to insert 0 values', () => {
   const emptyValues = SQLBuilder.insert().into('table');
   const emptyValuesArray = SQLBuilder.insert().into('table');
 
-  expect(() => emptyValues.insert()).toThrow(AT_LEAST_ONE_VALUE);
-  expect(() => emptyValuesArray.insert(['one'], [], [])).toThrow(AT_LEAST_ONE_VALUE);
+  expect(() => emptyValues.values()).toThrow(AT_LEAST_ONE_VALUE);
+  expect(() => emptyValuesArray.values(['one'], [], [])).toThrow(AT_LEAST_ONE_VALUE);
 });
 
 test('query.insert() requires the same number of scalar values between all elements to insert', () => {
   const wrongNumberOne = SQLBuilder.insert().into('table');
   const wrongNumberTwo = SQLBuilder.insert().into('table');
 
-  expect(() => wrongNumberOne.values(['one'], ['one', 'two'])).toThrow(ALL_RECORDS_SAME_LENGTH);
-  expect(() => wrongNumberTwo.values(['one', 'two', 'three'], ['one'], ['one', 'two'])).toThrow(ALL_RECORDS_SAME_LENGTH);
+  expect(() => wrongNumberOne.values(['one'], ['one', 'two'])).toThrow(ALL_ROWS_SAME_LENGTH);
+  expect(() => wrongNumberTwo.values(['one', 'two', 'three'], ['one'], ['one', 'two'])).toThrow(ALL_ROWS_SAME_LENGTH);
 });
 
 test('query.insert() does not allow nested values (arrays between arrays)', () => {
