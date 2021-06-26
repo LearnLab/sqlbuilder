@@ -2,6 +2,10 @@ const {
   REFERENCE_AND_SCALAR_REQUIRED,
   AS_MUCH_COLUMNS_AS_VALUES,
   AT_LEAST_ONE_VALUE,
+  NO_SCALARS_AND_ROWS,
+  ALL_ROWS_SAME_LENGTH,
+  NO_NESTED_VALUES,
+  NO_EMPTY_VALUES,
 } = require('./errors');
 
 /**
@@ -451,18 +455,21 @@ class SQLBuilder {
   values(...columnValues) {
     if (columnValues.length === 0) throw AT_LEAST_ONE_VALUE;
 
-    columnValues.reduce((prev, scalar) => {
+    columnValues.forEach((scalar) => {
+      const [first] = columnValues;
+
       if (scalar instanceof Array) {
         if (scalar.length === 0) throw AT_LEAST_ONE_VALUE;
-
-        if (this.columns.length > 0 && this.columns.length !== scalar.length) {
-          throw AS_MUCH_COLUMNS_AS_VALUES;
-        }
-
-        return scalar.length;
+        if (!(first instanceof Array)) throw NO_SCALARS_AND_ROWS;
+        if (first.length !== scalar.length) throw ALL_ROWS_SAME_LENGTH;
+        scalar.forEach((nested) => {
+          if (nested instanceof Array) throw NO_NESTED_VALUES;
+          if (!nested) throw NO_EMPTY_VALUES;
+        });
+      } else {
+        if (first instanceof Array) throw NO_SCALARS_AND_ROWS;
+        if (!scalar) throw NO_EMPTY_VALUES;
       }
-
-      return scalar;
     });
 
     /* Only check outside integrity if the column names are set */
