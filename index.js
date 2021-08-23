@@ -464,11 +464,11 @@ class SQLBuilder {
         if (first.length !== scalar.length) throw ALL_ROWS_SAME_LENGTH;
         scalar.forEach((nested) => {
           if (nested instanceof Array) throw NO_NESTED_VALUES;
-          if (!nested) throw NO_EMPTY_VALUES;
+          if (!nested && nested !== null) throw NO_EMPTY_VALUES;
         });
       } else {
         if (first instanceof Array) throw NO_SCALARS_AND_ROWS;
-        if (!scalar) throw NO_EMPTY_VALUES;
+        if (!scalar && scalar !== null) throw NO_EMPTY_VALUES;
       }
     });
 
