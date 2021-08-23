@@ -35,6 +35,19 @@ test('query.insert().into(table).values(val1, val2) => INSERT INTO table VALUES 
   expect(query.columnValues).toEqual(values);
 });
 
+/* Allows null and false */
+test('query.insert().into(table).values(false, null) => INSERT INTO table VALUES ($1, $2)', () => {
+  const table = 'table';
+  const values = [null, false];
+
+  const query = SQLBuilder.insert()
+    .into(table)
+    .values(...values);
+
+  expect(query.insertStatement()).toEqual('INSERT INTO table VALUES ($1, $2);');
+  expect(query.columnValues).toEqual(values);
+});
+
 /* Multiple rows */
 test('query.insert().into(table).values([val1, val2], [val3, val4], [val5, val6]) => INSERT INTO table VALUES ($1, $2), ($3, $4), ($5, $6)', () => {
   const table = 'table';
