@@ -1,4 +1,6 @@
 const Errors = {
+  /* Select clause errors */
+  NOT_STAR_MEMBER: Error('You can not use * as one of multiple elements'),
   /* Insert Errors */
   REFERENCE_AND_SCALAR_REQUIRED: Error('Table reference and scalar values are required'),
   AS_MUCH_COLUMNS_AS_VALUES: Error('The set of columns must have the same length as the number of scalar values'),
